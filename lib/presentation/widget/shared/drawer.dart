@@ -199,7 +199,7 @@ class DrawerCustom extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'GLU - Professional Edition 2025',
+                        'GNU - Professional Edition 2025',
                         style: TextStyle(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
                           fontSize: 10,

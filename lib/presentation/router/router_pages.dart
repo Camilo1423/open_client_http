@@ -14,4 +14,19 @@ final List<GoRoute> routesPages = [
     name: SettingsScreen.name,
     pageBuilder: (context, state) => animation(const SettingsScreen(), state),
   ),
+  GoRoute(
+    path: RouterPath.params,
+    name: ParamsScreen.name,
+    pageBuilder: (context, state) => animation(const ParamsScreen(), state),
+  ),
+  GoRoute(
+    path: RouterPath.authorization,
+    name: AuthorizationScreen.name,
+    pageBuilder: (context, state) => animation(const AuthorizationScreen(), state),
+  ),
+  GoRoute(
+    path: RouterPath.about,
+    name: AboutScreen.name,
+    pageBuilder: (context, state) => animation(const AboutScreen(), state),
+  ),
 ];

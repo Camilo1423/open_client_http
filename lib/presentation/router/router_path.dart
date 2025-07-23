@@ -6,4 +6,7 @@ class RouterPath {
   static const shared = '/shared';
   static const configuration = '/configuration';
   static const about = '/about';
+  static const params = '/params';
+  static const authorization = '/authorization';
+  static const history = '/history';
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_client_http/presentation/router/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_client_http/presentation/config/config.dart';
+import 'package:open_client_http/config/config.dart';
 import 'package:open_client_http/presentation/provider/providers.dart';
 
 void main() => runApp(const ProviderScope(child: Root()));
