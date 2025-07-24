@@ -42,6 +42,12 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   animated_custom_dropdown: ^3.1.1
   url_launcher: ^6.3.1
+  share_plus: ^10.0.2
+  dio: ^5.7.0
+  dio_cookie_manager: ^3.1.1
+  cookie_jar: ^4.0.8
+  interactive_json_preview: ^0.1.0
+
 
 dev_dependencies:
   flutter_test:

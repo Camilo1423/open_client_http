@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:open_client_http/presentation/router/router_path.dart';
+import 'package:share_plus/share_plus.dart';
 
 class DrawerCustom extends StatelessWidget {
   const DrawerCustom({super.key});
+
+  // Función para compartir el link de GitHub
+  void _shareGitHubLink() {
+    const gitHubUrl = 'https://github.com/Camilo1423/open_client_http';
+    const message = 'Check out Open Client HTTP! 🚀\n\nA professional tool for API testing.\n\n$gitHubUrl\n\n#APITesting #OpenSource #Flutter';
+    
+    Share.share(
+      message,
+      subject: 'Open Client HTTP - API Testing Tool',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +36,7 @@ class DrawerCustom extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: [
                   theme.colorScheme.primary,
-                  theme.colorScheme.primary.withOpacity(0.8),
+                  theme.colorScheme.primary.withValues(alpha: 0.8),
                 ],
               ),
             ),
@@ -41,7 +53,7 @@ class DrawerCustom extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
@@ -66,8 +78,8 @@ class DrawerCustom extends StatelessWidget {
                             Text(
                               'API Testing Tool',
                               style: TextStyle(
-                                color: theme.colorScheme.onPrimary.withOpacity(
-                                  0.8,
+                                color: theme.colorScheme.onPrimary.withValues(
+                                  alpha: 0.8,
                                 ),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w400,
@@ -124,12 +136,22 @@ class DrawerCustom extends StatelessWidget {
                 _buildMenuSection(context, 'TOOLS'),
                 _buildMenuItem(
                   context: context,
-                  icon: Icons.share_outlined,
-                  title: 'Shared',
-                  isSelected: currentLocation == RouterPath.shared,
+                  icon: Icons.code_outlined,
+                  title: 'Raw Editor',
+                  isSelected: currentLocation == RouterPath.rawEditor,
                   onTap: () {
                     Navigator.pop(context);
-                    context.go(RouterPath.shared);
+                    context.go(RouterPath.rawEditor);
+                  },
+                ),
+                _buildMenuItem(
+                  context: context,
+                  icon: Icons.share_outlined,
+                  title: 'Shared',
+                  isSelected: false, // Ya no se selecciona porque no navega
+                  onTap: () {
+                    Navigator.pop(context);
+                    _shareGitHubLink();
                   },
                 ),
                 
@@ -165,7 +187,7 @@ class DrawerCustom extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -201,7 +223,7 @@ class DrawerCustom extends StatelessWidget {
                       Text(
                         'GNU - Professional Edition 2025',
                         style: TextStyle(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           fontSize: 10,
                         ),
                       ),
@@ -223,7 +245,7 @@ class DrawerCustom extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           fontSize: 11,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.2,
@@ -246,7 +268,7 @@ class DrawerCustom extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: isSelected
-            ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
             : Colors.transparent,
       ),
       child: ListTile(
@@ -257,7 +279,7 @@ class DrawerCustom extends StatelessWidget {
           height: 32,
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.primary.withOpacity(0.1)
+                ? theme.colorScheme.primary.withValues(alpha: 0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
@@ -266,7 +288,7 @@ class DrawerCustom extends StatelessWidget {
             size: 20,
             color: isSelected
                 ? theme.colorScheme.primary
-                : theme.colorScheme.onSurface.withOpacity(0.7),
+                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
         title: Text(

@@ -8,5 +8,7 @@ class RouterPath {
   static const about = '/about';
   static const params = '/params';
   static const authorization = '/authorization';
+  static const rawEditor = '/raw-editor';
   static const history = '/history';
+  static const renderResponse = '/render-response';
 }

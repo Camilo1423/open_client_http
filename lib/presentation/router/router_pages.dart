@@ -25,8 +25,18 @@ final List<GoRoute> routesPages = [
     pageBuilder: (context, state) => animation(const AuthorizationScreen(), state),
   ),
   GoRoute(
+    path: RouterPath.rawEditor,
+    name: RawEditorScreen.name,
+    pageBuilder: (context, state) => animation(const RawEditorScreen(), state),
+  ),
+  GoRoute(
     path: RouterPath.about,
     name: AboutScreen.name,
     pageBuilder: (context, state) => animation(const AboutScreen(), state),
+  ),
+  GoRoute(
+    path: RouterPath.renderResponse,
+    name: RenderResponseScreen.name,
+    pageBuilder: (context, state) => animation(const RenderResponseScreen(), state),
   ),
 ];

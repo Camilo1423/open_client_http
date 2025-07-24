@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:open_client_http/presentation/router/router_path.dart';
 import 'package:open_client_http/presentation/widget/widgets.dart';
 import 'package:open_client_http/presentation/provider/current_request/current_request_provider.dart';
-import 'package:open_client_http/config/constants/headers.dart' as header_constants;
+import 'package:open_client_http/config/constants/headers.dart'
+    as header_constants;
 
 enum ParamType { params, headers }
 
@@ -49,7 +50,6 @@ class ParamsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final currentRequest = ref.watch(currentRequestProvider);
     final selectedType = ref.watch(selectedParamTypeProvider);
     final completeUrl = buildCompleteUrl(
@@ -123,7 +123,7 @@ class ParamsScreen extends ConsumerWidget {
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: theme.colorScheme.outline.withOpacity(0.3),
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -135,7 +135,7 @@ class ParamsScreen extends ConsumerWidget {
                   fontSize: 14,
                   fontFamily: 'monospace',
                   color: completeUrl.isEmpty
-                      ? theme.colorScheme.onSurface.withOpacity(0.5)
+                      ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
                       : theme.colorScheme.onSurface,
                 ),
               ),
@@ -158,7 +158,7 @@ class ParamsScreen extends ConsumerWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.3),
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -336,10 +336,10 @@ class ParamsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.05),
+        color: theme.colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.2),
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -433,7 +433,13 @@ class ParamsScreen extends ConsumerWidget {
             )
           else
             // Para headers - nuevo comportamiento con dropdowns
-            _buildHeaderForm(context, ref, keyController, valueController, theme),
+            _buildHeaderForm(
+              context,
+              ref,
+              keyController,
+              valueController,
+              theme,
+            ),
         ],
       ),
     );
@@ -519,9 +525,7 @@ class ParamsScreen extends ConsumerWidget {
       decoration: InputDecoration(
         filled: true,
         hintText: 'Header Key',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 12,
@@ -530,7 +534,7 @@ class ParamsScreen extends ConsumerWidget {
         suffixIcon: PopupMenuButton<String>(
           icon: Icon(
             Icons.arrow_drop_down,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           onSelected: (String value) {
             controller.text = value;
@@ -538,10 +542,7 @@ class ParamsScreen extends ConsumerWidget {
           },
           itemBuilder: (BuildContext context) {
             return header_constants.headers.map((String header) {
-              return PopupMenuItem<String>(
-                value: header,
-                child: Text(header),
-              );
+              return PopupMenuItem<String>(value: header, child: Text(header));
             }).toList();
           },
         ),
@@ -554,8 +555,12 @@ class ParamsScreen extends ConsumerWidget {
     TextEditingController controller,
     ThemeData theme,
   ) {
-    final hasDropdown = header_constants.genericsHeaders.containsKey(currentKey);
-    final values = hasDropdown ? header_constants.genericsHeaders[currentKey]! : <String>[];
+    final hasDropdown = header_constants.genericsHeaders.containsKey(
+      currentKey,
+    );
+    final values = hasDropdown
+        ? header_constants.genericsHeaders[currentKey]!
+        : <String>[];
 
     return TextField(
       controller: controller,
@@ -564,9 +569,7 @@ class ParamsScreen extends ConsumerWidget {
       decoration: InputDecoration(
         filled: true,
         hintText: 'Header Value',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 12,
@@ -576,7 +579,7 @@ class ParamsScreen extends ConsumerWidget {
             ? PopupMenuButton<String>(
                 icon: Icon(
                   Icons.arrow_drop_down,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 onSelected: (String value) {
                   controller.text = value;
@@ -620,7 +623,7 @@ class ParamsScreen extends ConsumerWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.3),
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -635,7 +638,7 @@ class ParamsScreen extends ConsumerWidget {
                   'Key',
                   style: TextStyle(
                     fontSize: 11,
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -660,7 +663,7 @@ class ParamsScreen extends ConsumerWidget {
                   'Value',
                   style: TextStyle(
                     fontSize: 11,
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -678,7 +681,7 @@ class ParamsScreen extends ConsumerWidget {
           const SizedBox(width: 12),
           // Botón editar
           Material(
-            color: theme.colorScheme.primary.withOpacity(0.1),
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             child: InkWell(
               onTap: () {
@@ -698,7 +701,7 @@ class ParamsScreen extends ConsumerWidget {
           const SizedBox(width: 8),
           // Botón eliminar
           Material(
-            color: Colors.red.withOpacity(0.1),
+            color: Colors.red.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             child: InkWell(
               onTap: () {
@@ -737,10 +740,10 @@ class ParamsScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.05),
+        color: theme.colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.3),
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -821,7 +824,8 @@ class ParamsScreen extends ConsumerWidget {
                             .addQueryParam(newKey, encodedValue);
 
                         // Salir del modo edición
-                        ref.read(editingParameterProvider.notifier).state = null;
+                        ref.read(editingParameterProvider.notifier).state =
+                            null;
                       }
                     },
                     borderRadius: BorderRadius.circular(8),
@@ -851,7 +855,14 @@ class ParamsScreen extends ConsumerWidget {
             )
           else
             // Para headers - nuevo comportamiento con dropdowns
-            _buildEditHeaderForm(context, ref, originalKey, keyController, valueController, theme),
+            _buildEditHeaderForm(
+              context,
+              ref,
+              originalKey,
+              keyController,
+              valueController,
+              theme,
+            ),
         ],
       ),
     );
@@ -954,9 +965,7 @@ class ParamsScreen extends ConsumerWidget {
       decoration: InputDecoration(
         filled: true,
         labelText: 'Header Key',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 12,
@@ -965,7 +974,7 @@ class ParamsScreen extends ConsumerWidget {
         suffixIcon: PopupMenuButton<String>(
           icon: Icon(
             Icons.arrow_drop_down,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           onSelected: (String value) {
             controller.text = value;
@@ -973,10 +982,7 @@ class ParamsScreen extends ConsumerWidget {
           },
           itemBuilder: (BuildContext context) {
             return header_constants.headers.map((String header) {
-              return PopupMenuItem<String>(
-                value: header,
-                child: Text(header),
-              );
+              return PopupMenuItem<String>(value: header, child: Text(header));
             }).toList();
           },
         ),
@@ -989,8 +995,12 @@ class ParamsScreen extends ConsumerWidget {
     TextEditingController controller,
     ThemeData theme,
   ) {
-    final hasDropdown = header_constants.genericsHeaders.containsKey(currentKey);
-    final values = hasDropdown ? header_constants.genericsHeaders[currentKey]! : <String>[];
+    final hasDropdown = header_constants.genericsHeaders.containsKey(
+      currentKey,
+    );
+    final values = hasDropdown
+        ? header_constants.genericsHeaders[currentKey]!
+        : <String>[];
 
     return TextField(
       controller: controller,
@@ -999,9 +1009,7 @@ class ParamsScreen extends ConsumerWidget {
       decoration: InputDecoration(
         filled: true,
         labelText: 'Header Value',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 12,
@@ -1011,7 +1019,7 @@ class ParamsScreen extends ConsumerWidget {
             ? PopupMenuButton<String>(
                 icon: Icon(
                   Icons.arrow_drop_down,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 onSelected: (String value) {
                   controller.text = value;
@@ -1040,7 +1048,7 @@ class ParamsScreen extends ConsumerWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.2),
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -1049,14 +1057,14 @@ class ParamsScreen extends ConsumerWidget {
           Icon(
             Icons.info_outline,
             size: 48,
-            color: theme.colorScheme.onSurface.withOpacity(0.3),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
             message,
             style: TextStyle(
               fontSize: 14,
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),

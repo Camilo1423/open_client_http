@@ -12,32 +12,29 @@ class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
   // Update URL with automatic query parameter parsing
   void updateUrlWithParsing(String fullUrl) {
     final trimmedUrl = fullUrl.trim();
-    
+
     // Handle empty URL
     if (trimmedUrl.isEmpty) {
       state = state.copyWith(url: '', queryParams: {});
       return;
     }
-    
+
     try {
       final uri = Uri.parse(trimmedUrl);
-      
+
       // Extract base URL (without query parameters)
       var baseUrl = uri.replace(queryParameters: {}).toString();
-      
+
       // Remove trailing "?" if it exists
       if (baseUrl.endsWith('?')) {
         baseUrl = baseUrl.substring(0, baseUrl.length - 1);
       }
-      
+
       // Extract query parameters
       final queryParams = Map<String, String>.from(uri.queryParameters);
-      
+
       // Update state with parsed values
-      state = state.copyWith(
-        url: baseUrl,
-        queryParams: queryParams,
-      );
+      state = state.copyWith(url: baseUrl, queryParams: queryParams);
     } catch (e) {
       // If parsing fails, clean up any trailing "?" and use as base URL
       var cleanUrl = trimmedUrl;
@@ -103,10 +100,7 @@ class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
 
   // Update basic auth credentials
   void updateBasicAuth(String? username, String? password) {
-    state = state.copyWith(
-      authUsername: username,
-      authPassword: password,
-    );
+    state = state.copyWith(authUsername: username, authPassword: password);
   }
 
   // Update raw body
@@ -142,10 +136,15 @@ class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
   }
 }
 
+final resetStateProvider = StateProvider<void>((ref) {
+  ref.read(currentRequestProvider.notifier).reset();
+});
+
 // Main provider
-final currentRequestProvider = StateNotifierProvider<CurrentRequestNotifier, CurrentRequest>(
-  (ref) => CurrentRequestNotifier(),
-);
+final currentRequestProvider =
+    StateNotifierProvider<CurrentRequestNotifier, CurrentRequest>(
+      (ref) => CurrentRequestNotifier(),
+    );
 
 // Computed providers for specific parts
 final currentMethodProvider = Provider<String>((ref) {
@@ -181,16 +180,16 @@ final isRequestReadyProvider = Provider<bool>((ref) {
 // Provider that combines URL + query parameters for display in input
 final displayUrlProvider = Provider<String>((ref) {
   final request = ref.watch(currentRequestProvider);
-  
+
   if (request.url.isEmpty) {
     return '';
   }
-  
+
   // If there are no query parameters, return just the URL
   if (request.queryParams.isEmpty) {
     return request.url;
   }
-  
+
   // Build the full URL with query parameters only if there are actual parameters
   try {
     final uri = Uri.parse(request.url);
@@ -200,4 +199,4 @@ final displayUrlProvider = Provider<String>((ref) {
     // If URL parsing fails, return the base URL
     return request.url;
   }
-}); 
+});
