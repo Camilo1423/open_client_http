@@ -269,5 +269,3 @@ class HttpDatasourceImpl implements HttpDatasource {
     }
   }
 }
-
- 

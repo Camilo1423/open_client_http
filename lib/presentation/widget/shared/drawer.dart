@@ -136,16 +136,6 @@ class DrawerCustom extends StatelessWidget {
                 _buildMenuSection(context, 'TOOLS'),
                 _buildMenuItem(
                   context: context,
-                  icon: Icons.code_outlined,
-                  title: 'Raw Editor',
-                  isSelected: currentLocation == RouterPath.rawEditor,
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.go(RouterPath.rawEditor);
-                  },
-                ),
-                _buildMenuItem(
-                  context: context,
                   icon: Icons.share_outlined,
                   title: 'Shared',
                   isSelected: false, // Ya no se selecciona porque no navega
