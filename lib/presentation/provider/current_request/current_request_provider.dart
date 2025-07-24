@@ -1,8 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_client_http/config/config.dart';
 import 'package:open_client_http/domain/models/current_request.dart';
 
 class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
-  CurrentRequestNotifier() : super(const CurrentRequest());
+  CurrentRequestNotifier() : super(_getInitialRequest());
+
+  // Default headers for all requests
+  static Map<String, String> get _defaultHeaders => {
+    'User-Agent': 'OpenClientRuntime/${Enviroment.version}',
+    'Accept': '*/*',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+  };
+
+  // Get initial request with default headers
+  static CurrentRequest _getInitialRequest() {
+    return CurrentRequest(headers: _defaultHeaders);
+  }
 
   // Update HTTP method
   void updateMethod(String method) {
@@ -88,6 +102,23 @@ class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
     state = state.copyWith(headers: newHeaders);
   }
 
+  // Restore default headers
+  void restoreDefaultHeaders() {
+    final currentHeaders = Map<String, String>.from(state.headers);
+    // Add default headers, but don't override existing ones
+    for (final entry in _defaultHeaders.entries) {
+      if (!currentHeaders.containsKey(entry.key)) {
+        currentHeaders[entry.key] = entry.value;
+      }
+    }
+    state = state.copyWith(headers: currentHeaders);
+  }
+
+  // Get default headers (for UI reference)
+  Map<String, String> getDefaultHeaders() {
+    return Map<String, String>.from(_defaultHeaders);
+  }
+
   // Update authorization method
   void updateAuthMethod(AuthorizationMethod authMethod) {
     state = state.copyWith(authMethod: authMethod);
@@ -110,7 +141,7 @@ class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
 
   // Reset all to defaults
   void reset() {
-    state = const CurrentRequest();
+    state = _getInitialRequest();
   }
 
   // Clear specific sections
@@ -119,7 +150,7 @@ class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
   }
 
   void clearHeaders() {
-    state = state.copyWith(headers: {});
+    state = state.copyWith(headers: _defaultHeaders);
   }
 
   void clearAuth() {

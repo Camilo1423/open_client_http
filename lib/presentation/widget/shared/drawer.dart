@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:open_client_http/config/config.dart';
 import 'package:open_client_http/presentation/router/router_path.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -203,7 +204,7 @@ class DrawerCustom extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'v1.0.0',
+                        'v${Enviroment.version}',
                         style: TextStyle(
                           color: theme.colorScheme.onSurface,
                           fontSize: 12,
