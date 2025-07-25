@@ -1,6 +1,7 @@
 import 'package:open_client_http/domain/models/url_parameter.dart';
 
 class CurrentRequest {
+  final String? id;
   final String method;
   final String baseUrl;
   final String url;
@@ -14,6 +15,7 @@ class CurrentRequest {
   final String rawBody;
 
   const CurrentRequest({
+    this.id,
     this.method = 'GET',
     this.baseUrl = '',
     this.url = '',
@@ -28,6 +30,7 @@ class CurrentRequest {
   });
 
   CurrentRequest copyWith({
+    String? id,
     String? method,
     String? baseUrl,
     String? url,
@@ -41,6 +44,7 @@ class CurrentRequest {
     String? rawBody,
   }) {
     return CurrentRequest(
+      id: id ?? this.id,
       method: method ?? this.method,
       baseUrl: baseUrl ?? this.baseUrl,
       url: url ?? this.url,
@@ -55,15 +59,19 @@ class CurrentRequest {
     );
   }
 
+  /// Check if this request is saved (has an ID)
+  bool get isSaved => id != null && id!.isNotEmpty;
+
   @override
   String toString() {
-    return 'CurrentRequest(method: $method, baseUrl: $baseUrl, url: $url, queryParams: $queryParams, finalQueryParams: $finalQueryParams, headers: $headers, authMethod: $authMethod, rawBody: $rawBody)';
+    return 'CurrentRequest(id: $id, method: $method, baseUrl: $baseUrl, url: $url, queryParams: $queryParams, finalQueryParams: $finalQueryParams, headers: $headers, authMethod: $authMethod, rawBody: $rawBody)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is CurrentRequest &&
+        other.id == id &&
         other.method == method &&
         other.baseUrl == baseUrl &&
         other.url == url &&
@@ -80,6 +88,7 @@ class CurrentRequest {
   @override
   int get hashCode {
     return Object.hash(
+      id,
       method,
       baseUrl,
       url,

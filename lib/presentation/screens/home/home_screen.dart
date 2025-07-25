@@ -3,17 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:open_client_http/config/config.dart';
+import 'package:open_client_http/domain/models/models.dart';
+import 'package:open_client_http/presentation/provider/collections/collections_provider.dart';
 import 'package:open_client_http/presentation/provider/providers.dart';
 import 'package:open_client_http/presentation/router/router_path.dart';
 import 'package:open_client_http/presentation/widget/widgets.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   static const String name = "home_screen";
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  late TextEditingController _urlController;
+
+  @override
+  void initState() {
+    super.initState();
+    _urlController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Listener(
       onPointerDown: (_) {
         FocusScopeNode currentFocus = FocusScope.of(context);
@@ -664,22 +685,25 @@ class HomeScreen extends ConsumerWidget {
   Widget _buildInput(BuildContext context, WidgetRef ref) {
     final displayUrl = ref.watch(displayUrlProvider);
 
+    if (_urlController.text.isEmpty && displayUrl.isNotEmpty) {
+      _urlController.text = displayUrl;
+    } else if (displayUrl.isEmpty && _urlController.text.isNotEmpty) {
+      _urlController.text = '';
+    } else if (_urlController.text != displayUrl && displayUrl.isNotEmpty) {
+      _urlController.text = displayUrl;
+    }
+
     return Column(
       children: [
         TextField(
           autocorrect: false,
           enableSuggestions: false,
+          controller: _urlController,
           onChanged: (value) {
             ref
                 .read(currentRequestProvider.notifier)
                 .updateUrlWithParsing(value);
           },
-          controller: TextEditingController.fromValue(
-            TextEditingValue(
-              text: displayUrl,
-              selection: TextSelection.collapsed(offset: displayUrl.length),
-            ),
-          ),
           decoration: InputDecoration(
             filled: true,
             hintText:
@@ -1044,37 +1068,96 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildActions(BuildContext context, WidgetRef ref) {
+    final isRequestSaved = ref.watch(isRequestSavedProvider);
+
     return Row(
       children: [
+        // IconButton(
+        //   tooltip: 'View history',
+        //   icon: const Icon(Icons.history),
+        //   onPressed: () {
+        //     context.go(RouterPath.history);
+        //   },
+        // ),
+        // Save/Update request button
         IconButton(
-          tooltip: 'View history',
-          icon: const Icon(Icons.history),
-          onPressed: () {
-            context.go(RouterPath.history);
-          },
+          tooltip: isRequestSaved ? 'Update saved request' : 'Save request',
+          icon: Icon(isRequestSaved ? Icons.save : Icons.save_outlined),
+          onPressed: () => _handleSaveRequest(context, ref),
         ),
-        // Icono para guardar la request
-        IconButton(
-          tooltip: 'Save request',
-          icon: const Icon(Icons.save),
-          onPressed: () {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Request guardada')));
-          },
-        ),
-        // Icono para limpiar la request
+        // Clear request button
         IconButton(
           tooltip: 'Clear request',
           icon: const Icon(Icons.clear),
           onPressed: () {
             ref.read(currentRequestProvider.notifier).reset();
+            // clean slected env
+            ref.read(selectedEnvironmentProvider.notifier).state = null;
+
+            // Clear the URL controller as well
+            _urlController.clear();
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('Request limpiada')));
+            ).showSnackBar(const SnackBar(content: Text('Request cleared')));
           },
         ),
       ],
     );
+  }
+
+  Future<void> _handleSaveRequest(BuildContext context, WidgetRef ref) async {
+    final currentRequest = ref.read(currentRequestProvider);
+    final isRequestReady = ref.read(isAvailableRequestProvider);
+
+    // Validate request before saving
+    if (isRequestReady.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isRequestReady),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    if (currentRequest.isSaved) {
+      await _updateExistingRequest(context, ref, currentRequest);
+      // Request has ID, update existing
+    } else {
+      // Request doesn't have ID, navigate to collections to select folder
+      _navigateToSelectFolder(context, ref);
+    }
+  }
+
+  Future<void> _updateExistingRequest(
+    BuildContext context,
+    WidgetRef ref,
+    CurrentRequest request,
+  ) async {
+    final existingSavedRequest = await ref
+        .read(collectionsProvider.notifier)
+        .getSavedRequestById(request.id!);
+
+    final updatedRequest = SavedRequest(
+      id: int.parse(request.id!),
+      collectionPath: existingSavedRequest!.collectionPath,
+      name: existingSavedRequest.name,
+      request: request,
+      createdAt: existingSavedRequest.createdAt, // Keep original creation time
+      updatedAt: DateTime.now(), // Update the modification time
+    );
+    await ref
+        .read(collectionsProvider.notifier)
+        .updateSavedRequest(updatedRequest.name, updatedRequest);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Request updated successfully'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+
+  void _navigateToSelectFolder(BuildContext context, WidgetRef ref) {
+    context.go('${RouterPath.collections}?mode=save');
   }
 }

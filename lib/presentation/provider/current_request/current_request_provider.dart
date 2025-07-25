@@ -32,7 +32,11 @@ class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
 
     // Handle empty URL
     if (trimmedUrl.isEmpty) {
-      state = state.copyWith(url: '', queryParams: []);
+      state = state.copyWith(
+        url: '', 
+        baseUrl: '', 
+        queryParams: []
+      );
       return;
     }
 
@@ -116,6 +120,16 @@ class CurrentRequestNotifier extends StateNotifier<CurrentRequest> {
     state = state.copyWith(rawBody: rawBody);
   }
 
+  // Set ID for saved request
+  void setRequestId(String id) {
+    state = state.copyWith(id: id);
+  }
+
+  // Clear ID (for new request)
+  void clearRequestId() {
+    state = state.copyWith(id: null);
+  }
+
   // Reset all to defaults
   void reset() {
     state = _getInitialRequest();
@@ -178,6 +192,11 @@ final currentAuthMethodProvider = Provider<AuthorizationMethod>((ref) {
 
 final currentRawBodyProvider = Provider<String>((ref) {
   return ref.watch(currentRequestProvider).rawBody;
+});
+
+// Check if current request is saved
+final isRequestSavedProvider = Provider<bool>((ref) {
+  return ref.watch(currentRequestProvider).isSaved;
 });
 
 // Helper provider to check if request is ready to send

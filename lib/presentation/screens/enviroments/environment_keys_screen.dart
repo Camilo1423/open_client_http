@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:open_client_http/presentation/router/index.dart';
@@ -504,6 +505,16 @@ class _CreateEnvironmentKeyBottomSheetState extends State<_CreateEnvironmentKeyB
                               prefixIcon: const Icon(Icons.vpn_key),
                             ),
                             style: const TextStyle(fontFamily: 'monospace'),
+                            inputFormatters: [
+                              TextInputFormatter.withFunction(
+                                (oldValue, newValue) {
+                                  return newValue.copyWith(
+                                    text: newValue.text.toUpperCase(),
+                                    selection: newValue.selection,
+                                  );
+                                },
+                              ),
+                            ],
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Key is required';

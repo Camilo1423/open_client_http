@@ -386,9 +386,9 @@ class _AuthorizationScreenState extends ConsumerState<AuthorizationScreen> {
           onChanged: (value) {
             final notifier = ref.read(currentRequestProvider.notifier);
             notifier.updateBasicAuth(
-              value.isEmpty ? null : value,
+              value.isEmpty ? "" : value,
               _passwordController.text.isEmpty
-                  ? null
+                  ? ""
                   : _passwordController.text,
             );
           },
@@ -416,9 +416,9 @@ class _AuthorizationScreenState extends ConsumerState<AuthorizationScreen> {
             final notifier = ref.read(currentRequestProvider.notifier);
             notifier.updateBasicAuth(
               _usernameController.text.isEmpty
-                  ? null
+                  ? ""
                   : _usernameController.text,
-              value.isEmpty ? null : value,
+              value.isEmpty ? "" : value,
             );
           },
         ),
@@ -486,7 +486,7 @@ class _AuthorizationScreenState extends ConsumerState<AuthorizationScreen> {
           ),
           onChanged: (value) {
             final notifier = ref.read(currentRequestProvider.notifier);
-            notifier.updateAuthToken(value.isEmpty ? null : value);
+            notifier.updateAuthToken(value.isEmpty ? "" : value);
           },
         ),
         const SizedBox(height: 16),

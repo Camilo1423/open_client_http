@@ -56,4 +56,9 @@ final List<GoRoute> routesPages = [
       return animation(EnvironmentKeysScreen(environmentId: environmentId, returnTo: returnTo), state);
     },
   ),
+  GoRoute(
+    path: RouterPath.collections,
+    name: CollectionsScreen.name,
+    pageBuilder: (context, state) => animation(const CollectionsScreen(), state),
+  ),
 ];

@@ -7,3 +7,4 @@ export 'renderResponse/render_repsonse_screen.dart';
 export 'about/about_screen.dart';
 export 'enviroments/enviroment_screen.dart';
 export 'enviroments/environment_keys_screen.dart';
+export 'collections/collections_screen.dart';

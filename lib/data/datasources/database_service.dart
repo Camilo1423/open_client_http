@@ -93,30 +93,52 @@ class DatabaseService {
       );
     ''');
 
-    // Collections table for organizing requests
+    // Collections table - stores the hierarchical structure like S3
     _database!.execute('''
       CREATE TABLE IF NOT EXISTS collections (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        path TEXT NOT NULL UNIQUE,
         name TEXT NOT NULL,
-        description TEXT,
+        type TEXT NOT NULL CHECK (type IN ('folder', 'file')),
+        parent_path TEXT,
         created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY (parent_path) REFERENCES collections (path) ON DELETE CASCADE
       );
     ''');
 
-    // Saved requests table
+    _database!.execute('''
+      INSERT OR IGNORE INTO collections (path, name, type, parent_path, created_at, updated_at)
+      VALUES (
+          '/',
+          'Root',
+          'folder',
+          NULL,
+          ${DateTime.now().millisecondsSinceEpoch},
+          ${DateTime.now().millisecondsSinceEpoch}
+      );
+    ''');
+
+    // Saved requests table - stores the actual request data
     _database!.execute('''
       CREATE TABLE IF NOT EXISTS saved_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        collection_id INTEGER,
+        collection_path TEXT NOT NULL,
         name TEXT NOT NULL,
-        url TEXT NOT NULL,
         method TEXT NOT NULL,
-        headers TEXT,
-        body TEXT,
+        base_url TEXT NOT NULL,
+        url TEXT NOT NULL,
+        query_params TEXT, -- JSON string of query parameters
+        headers TEXT, -- JSON string of headers
+        auth_method TEXT NOT NULL,
+        auth_token TEXT,
+        auth_username TEXT,
+        auth_password TEXT,
+        raw_body TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
-        FOREIGN KEY (collection_id) REFERENCES collections (id) ON DELETE SET NULL
+        FOREIGN KEY (collection_path) REFERENCES collections (path) ON DELETE CASCADE,
+        UNIQUE(collection_path, name)
       );
     ''');
 
@@ -126,7 +148,11 @@ class DatabaseService {
     _database!.execute('CREATE INDEX IF NOT EXISTS idx_environments_name ON environments(name);');
     _database!.execute('CREATE INDEX IF NOT EXISTS idx_environment_keys_environment_id ON environment_keys(environment_id);');
     _database!.execute('CREATE INDEX IF NOT EXISTS idx_environment_keys_key ON environment_keys(key);');
-    _database!.execute('CREATE INDEX IF NOT EXISTS idx_saved_requests_collection_id ON saved_requests(collection_id);');
+    _database!.execute('CREATE INDEX IF NOT EXISTS idx_collections_path ON collections(path);');
+    _database!.execute('CREATE INDEX IF NOT EXISTS idx_collections_parent_path ON collections(parent_path);');
+    _database!.execute('CREATE INDEX IF NOT EXISTS idx_collections_type ON collections(type);');
+    _database!.execute('CREATE INDEX IF NOT EXISTS idx_saved_requests_collection_path ON saved_requests(collection_path);');
+    _database!.execute('CREATE INDEX IF NOT EXISTS idx_saved_requests_name ON saved_requests(name);');
   }
 
   /// Execute a query with parameters
