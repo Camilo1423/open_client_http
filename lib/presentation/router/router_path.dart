@@ -1,6 +1,7 @@
 class RouterPath {
   static const home = '/';
   static const environments = '/environments';
+  static const environmentKeys = '/environments/:environmentId/keys';
   static const collections = '/collections';
   static const requests = '/requests';
   static const shared = '/shared';

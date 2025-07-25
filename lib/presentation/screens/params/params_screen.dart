@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:open_client_http/domain/models/url_parameter.dart';
+import 'package:open_client_http/presentation/helpers/url_parse_helper.dart';
 import 'package:open_client_http/presentation/router/router_path.dart';
 import 'package:open_client_http/presentation/widget/widgets.dart';
 import 'package:open_client_http/presentation/provider/current_request/current_request_provider.dart';
@@ -37,15 +39,9 @@ class ParamsScreen extends ConsumerWidget {
   }
 
   // Construir URL completa con parámetros
-  String buildCompleteUrl(String baseUrl, Map<String, String> queryParams) {
+  String buildCompleteUrl(String baseUrl, List<UrlParameter> queryParams) {
     if (queryParams.isEmpty) return baseUrl;
-
-    final uri = Uri.parse(baseUrl.contains('?') ? baseUrl : baseUrl);
-    final existingParams = Map<String, String>.from(uri.queryParameters);
-    existingParams.addAll(queryParams);
-
-    final newUri = uri.replace(queryParameters: existingParams);
-    return newUri.toString();
+    return UrlHelper.rebuildRawUrl(baseUrl, queryParams);
   }
 
   @override
@@ -53,7 +49,7 @@ class ParamsScreen extends ConsumerWidget {
     final currentRequest = ref.watch(currentRequestProvider);
     final selectedType = ref.watch(selectedParamTypeProvider);
     final completeUrl = buildCompleteUrl(
-      currentRequest.url,
+      currentRequest.baseUrl,
       currentRequest.queryParams,
     );
 
@@ -269,7 +265,7 @@ class ParamsScreen extends ConsumerWidget {
   Widget _buildParamsSection(
     BuildContext context,
     WidgetRef ref,
-    Map<String, String> params,
+    List<UrlParameter> params,
   ) {
     return Column(
       children: [
@@ -280,12 +276,12 @@ class ParamsScreen extends ConsumerWidget {
 
         // Existing parameters
         if (params.isNotEmpty) ...[
-          ...params.entries.map(
-            (entry) => _buildExistingParameter(
+          ...params.map(
+            (param) => _buildExistingParameter(
               context,
               ref,
-              entry.key,
-              entry.value,
+              param.key,
+              param.value,
               true,
             ),
           ),
@@ -409,11 +405,10 @@ class ParamsScreen extends ConsumerWidget {
                       final key = keyController.text.trim();
                       final value = valueController.text.trim();
 
-                      if (key.isNotEmpty && value.isNotEmpty) {
-                        final encodedValue = encodeValue(value);
+                      if (key.isNotEmpty) {
                         ref
                             .read(currentRequestProvider.notifier)
-                            .addQueryParam(key, encodedValue);
+                            .addQueryParam(key, value);
                         keyController.clear();
                         valueController.clear();
                       }
@@ -814,14 +809,13 @@ class ParamsScreen extends ConsumerWidget {
                       final newKey = keyController.text.trim();
                       final newValue = valueController.text.trim();
 
-                      if (newKey.isNotEmpty && newValue.isNotEmpty) {
-                        final encodedValue = encodeValue(newValue);
+                      if (newKey.isNotEmpty) {
                         ref
                             .read(currentRequestProvider.notifier)
                             .removeQueryParam(originalKey);
                         ref
                             .read(currentRequestProvider.notifier)
-                            .addQueryParam(newKey, encodedValue);
+                            .addQueryParam(newKey, newValue);
 
                         // Salir del modo edición
                         ref.read(editingParameterProvider.notifier).state =

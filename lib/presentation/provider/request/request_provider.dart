@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_client_http/data/data.dart';
 import 'package:open_client_http/domain/domain.dart';
+import 'package:open_client_http/presentation/helpers/url_parse_helper.dart';
 import 'package:open_client_http/presentation/provider/settings/timeout_settings_provider.dart';
 import 'package:open_client_http/presentation/provider/response/response_provider.dart';
+import 'package:open_client_http/presentation/provider/environment/selected_environment_provider.dart';
+import 'package:open_client_http/presentation/provider/current_request/current_request_provider.dart';
 
 // Dependency injection providers
 final httpDatasourceProvider = Provider<HttpDatasource>((ref) {
@@ -58,7 +61,13 @@ class RequestExecutionNotifier extends StateNotifier<RequestExecutionState> {
     state = const RequestExecutionState(state: RequestState.loading);
 
     try {
-      final response = await _executeHttpRequestUseCase(request);
+      // Get environment variables for interpolation
+      final environmentKeysMap = _ref.read(selectedEnvironmentKeysMapProvider);
+      
+      // Create a copy of the request with interpolated variables
+      final interpolatedRequest = _interpolateRequestVariables(request, environmentKeysMap);
+      
+      final response = await _executeHttpRequestUseCase(interpolatedRequest);
       
       // Update response provider with the result
       _ref.read(responseProvider.notifier).setResponse(response);
@@ -70,6 +79,45 @@ class RequestExecutionNotifier extends StateNotifier<RequestExecutionState> {
         errorMessage: e.toString(),
       );
     }
+  }
+
+  // Helper method to interpolate variables in the request
+  CurrentRequest _interpolateRequestVariables(CurrentRequest request, Map<String, String> environmentVars) {
+    if (environmentVars.isEmpty) return request;
+
+    // Interpolate URL
+    final interpolatedUrl = UrlHelper.replaceBaseUrlVariables(request.baseUrl, environmentVars);
+    
+    // Interpolate query parameters
+    final interpolatedQueryParams = UrlHelper.replaceQueryParamsVariables(request.queryParams, environmentVars);
+    
+    // Interpolate headers
+    final interpolatedHeaders = UrlHelper.replaceHeadersVariables(request.headers, environmentVars);
+    
+    // Interpolate raw body
+    final interpolatedRawBody = UrlHelper.replaceRawBodyVariables(request.rawBody, environmentVars);
+    
+    // Interpolate auth token if present
+    String? interpolatedAuthToken;
+    if (request.authToken != null) {
+      interpolatedAuthToken = UrlHelper.replaceAuthTokenVariables(request.authToken!, environmentVars);
+    }
+    
+    // Interpolate auth credentials if present
+    Map<String, String>? interpolatedAuthCredentials;
+    if (request.authUsername != null && request.authPassword != null) {
+      interpolatedAuthCredentials = UrlHelper.replaceAuthCredentialsVariables(request.authUsername!, request.authPassword!, environmentVars);
+    }
+    
+    return request.copyWith(
+      baseUrl: interpolatedUrl,
+      finalQueryParams: interpolatedQueryParams,
+      headers: interpolatedHeaders,
+      rawBody: interpolatedRawBody,
+      authToken: interpolatedAuthToken,
+      authUsername: interpolatedAuthCredentials?["username"],
+      authPassword: interpolatedAuthCredentials?["password"],
+    );
   }
 
   void reset() {

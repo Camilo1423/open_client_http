@@ -1,7 +1,11 @@
+import 'package:open_client_http/domain/models/url_parameter.dart';
+
 class CurrentRequest {
   final String method;
+  final String baseUrl;
   final String url;
-  final Map<String, String> queryParams;
+  final List<UrlParameter> queryParams;
+  final Map<String, String> finalQueryParams;
   final Map<String, String> headers;
   final AuthorizationMethod authMethod;
   final String? authToken;
@@ -11,8 +15,10 @@ class CurrentRequest {
 
   const CurrentRequest({
     this.method = 'GET',
+    this.baseUrl = '',
     this.url = '',
-    this.queryParams = const {},
+    this.queryParams = const [],
+    this.finalQueryParams = const {},
     this.headers = const {},
     this.authMethod = AuthorizationMethod.none,
     this.authToken,
@@ -23,8 +29,10 @@ class CurrentRequest {
 
   CurrentRequest copyWith({
     String? method,
+    String? baseUrl,
     String? url,
-    Map<String, String>? queryParams,
+    List<UrlParameter>? queryParams,
+    Map<String, String>? finalQueryParams,
     Map<String, String>? headers,
     AuthorizationMethod? authMethod,
     String? authToken,
@@ -34,8 +42,10 @@ class CurrentRequest {
   }) {
     return CurrentRequest(
       method: method ?? this.method,
+      baseUrl: baseUrl ?? this.baseUrl,
       url: url ?? this.url,
       queryParams: queryParams ?? this.queryParams,
+      finalQueryParams: finalQueryParams ?? this.finalQueryParams,
       headers: headers ?? this.headers,
       authMethod: authMethod ?? this.authMethod,
       authToken: authToken ?? this.authToken,
@@ -47,7 +57,7 @@ class CurrentRequest {
 
   @override
   String toString() {
-    return 'CurrentRequest(method: $method, url: $url, queryParams: $queryParams, headers: $headers, authMethod: $authMethod, rawBody: $rawBody)';
+    return 'CurrentRequest(method: $method, baseUrl: $baseUrl, url: $url, queryParams: $queryParams, finalQueryParams: $finalQueryParams, headers: $headers, authMethod: $authMethod, rawBody: $rawBody)';
   }
 
   @override
@@ -55,8 +65,10 @@ class CurrentRequest {
     if (identical(this, other)) return true;
     return other is CurrentRequest &&
         other.method == method &&
+        other.baseUrl == baseUrl &&
         other.url == url &&
         other.queryParams.toString() == queryParams.toString() &&
+        other.finalQueryParams.toString() == finalQueryParams.toString() &&
         other.headers.toString() == headers.toString() &&
         other.authMethod == authMethod &&
         other.authToken == authToken &&
@@ -69,6 +81,7 @@ class CurrentRequest {
   int get hashCode {
     return Object.hash(
       method,
+      baseUrl,
       url,
       queryParams,
       headers,
@@ -81,12 +94,7 @@ class CurrentRequest {
   }
 }
 
-enum AuthorizationMethod {
-  none,
-  bearerToken,
-  basicAuth,
-  apiKey,
-}
+enum AuthorizationMethod { none, bearerToken, basicAuth, apiKey }
 
 extension AuthorizationMethodExtension on AuthorizationMethod {
   String get displayName {
@@ -101,4 +109,4 @@ extension AuthorizationMethodExtension on AuthorizationMethod {
         return 'API Key';
     }
   }
-} 
+}

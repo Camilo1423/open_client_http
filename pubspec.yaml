@@ -47,6 +47,10 @@ dependencies:
   dio_cookie_manager: ^3.1.1
   cookie_jar: ^4.0.8
   interactive_json_preview: ^0.1.0
+  sqlite3: ^2.7.7
+  sqlite3_flutter_libs: ^0.5.24
+  path: ^1.9.0
+  path_provider: ^2.1.4
 
 
 dev_dependencies:

@@ -3,8 +3,16 @@ import 'package:open_client_http/presentation/router/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_client_http/config/config.dart';
 import 'package:open_client_http/presentation/provider/providers.dart';
+import 'package:open_client_http/data/datasources/database_service.dart';
 
-void main() => runApp(const ProviderScope(child: Root()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializar la base de datos
+  await DatabaseService().initDatabase();
+  
+  runApp(const ProviderScope(child: Root()));
+}
 
 class Root extends ConsumerWidget {
   const Root({super.key});

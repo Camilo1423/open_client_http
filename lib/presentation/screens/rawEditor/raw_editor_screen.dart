@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,7 +44,7 @@ class _RawEditorScreenState extends ConsumerState<RawEditorScreen> {
   }
 
   void _validateJson(String text) {
-    final trimmedText = text.trim();
+    String trimmedText = text.trim();
 
     setState(() {
       _hasContent = trimmedText.isNotEmpty;
@@ -58,6 +59,10 @@ class _RawEditorScreenState extends ConsumerState<RawEditorScreen> {
 
     try {
       // Intentar decodificar el JSON
+      final tempEnv = <String, String>{};
+
+      trimmedText = _replaceVariablesWithRandomKeys(trimmedText, tempEnv);
+
       final decoded = jsonDecode(trimmedText);
 
       if (JsonDuplicateKeyChecker(trimmedText).hasDuplicateKeys()) {
@@ -67,6 +72,8 @@ class _RawEditorScreenState extends ConsumerState<RawEditorScreen> {
         });
         return;
       }
+
+      trimmedText = _replaceRandomKeysWithVariables(trimmedText, tempEnv);
 
       // Verificar que sea un objeto o array válido
       if (decoded is Map || decoded is List) {
@@ -118,7 +125,7 @@ class _RawEditorScreenState extends ConsumerState<RawEditorScreen> {
   }
 
   void _beautifyJson() {
-    final currentText = _textController.text.trim();
+    String currentText = _textController.text.trim();
 
     // Verificar que no esté vacío
     if (currentText.isEmpty) {
@@ -132,11 +139,19 @@ class _RawEditorScreenState extends ConsumerState<RawEditorScreen> {
     }
 
     try {
+      final tempEnv = <String, String>{};
+
+      currentText = _replaceVariablesWithRandomKeys(currentText, tempEnv);
+
       // Intentar decodificar el JSON
       final jsonObject = jsonDecode(currentText);
 
       // Formatear con indentación
-      final prettyJson = const JsonEncoder.withIndent('  ').convert(jsonObject);
+      String prettyJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(jsonObject);
+
+      prettyJson = _replaceRandomKeysWithVariables(prettyJson, tempEnv);
 
       // Actualizar el texto del controller
       _textController.value = TextEditingValue(
@@ -172,6 +187,80 @@ class _RawEditorScreenState extends ConsumerState<RawEditorScreen> {
         ),
       );
     }
+  }
+
+  String _replaceVariablesWithRandomKeys(
+    String currentText,
+    Map<String, String> tempEnv,
+  ) {
+    final variableRegex = RegExp(r'\{\{([A-Z_][A-Z0-9_]*)\}\}');
+
+    // Reemplaza cada variable {{VARIABLE_NAME}} por un valor string válido para JSON
+    // Si la variable ya está envuelta en comillas, solo agrega la random key, si no, la envuelve en comillas
+    currentText = currentText.replaceAllMapped(variableRegex, (match) {
+      final key = match.group(1)!;
+      final randomKey = 'RANDOM_KEY_${Random().nextInt(1000000)}';
+
+      // Detectar si la variable está envuelta en comillas
+      // match.start y match.end nos dan la posición de la variable en el texto original
+      final start = match.start;
+      final end = match.end;
+
+      // Buscar el carácter antes y después de la variable (ignorando espacios)
+      bool isWrappedInQuotes = false;
+      if (start > 0 && end < currentText.length) {
+        // Busca hacia atrás el primer caracter no espacio antes de start
+        int i = start - 1;
+        while (i >= 0 && currentText[i].trim().isEmpty) {
+          i--;
+        }
+        final before = (i >= 0) ? currentText[i] : null;
+
+        // Busca hacia adelante el primer caracter no espacio después de end-1
+        int j = end;
+        while (j < currentText.length && currentText[j].trim().isEmpty) {
+          j++;
+        }
+        final after = (j < currentText.length) ? currentText[j] : null;
+
+        // Si antes y después hay comillas, consideramos que está envuelta
+        if (before == '"' && after == '"') {
+          isWrappedInQuotes = true;
+        }
+      }
+
+      if (isWrappedInQuotes) {
+        // Si ya está envuelta en comillas, solo ponemos la random key
+        tempEnv[randomKey] = "$key|-wrapped";
+        return randomKey;
+      } else {
+        // Si no está envuelta, la envolvemos en comillas
+        tempEnv[randomKey] = "$key|-notwrapped";
+        return '"$randomKey"';
+      }
+    });
+
+    return currentText;
+  }
+
+  String _replaceRandomKeysWithVariables(
+    String currentText,
+    Map<String, String> tempEnv,
+  ) {
+    // Reemplaza los random keys por las variables originales, quitando las comillas si están presentes
+    for (final key in tempEnv.keys) {
+      final splitKey = tempEnv[key]!.split('|-');
+      final isWrapped = splitKey.length > 1 && splitKey[1] == 'wrapped';
+
+      final variable = '{{${splitKey[0]}}}';
+      // Primero reemplaza las ocurrencias con comillas
+      if (isWrapped) {
+        currentText = currentText.replaceAll(key, variable);
+      } else {
+        currentText = currentText.replaceAll('"$key"', variable);
+      }
+    }
+    return currentText;
   }
 
   Widget _buildHelperButton({
